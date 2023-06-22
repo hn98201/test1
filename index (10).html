@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>패턴 분석 프로그램 - 예측값</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+             body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .pattern-button {
+            flex: 1;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pattern-button:hover {
+            background-color: #0056b3;
+        }
+
+        .result-label {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .data-label {
+            text-align: center;
+            font-size: 12px;
+            color: #dc3545;
+        }
+
+        .reset-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        @media only screen and (max-width: 400px) {
+            .container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .button-group {
+                flex-wrap: wrap;
+            }
+
+            .pattern-button {
+                flex: 0 0 32%;
+                margin: 5px;
+                font-size: 14px;
+            }
+
+            .result-label {
+                font-size: 18px;
+            }
+        }
+
+        .add-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 200px;
+            height: 50px;
+            margin: 20px auto;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background-color: #45a049;
+        }  
+
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<script>
+    var boardCount = 1;
+    var dataLists = {};
+    var resultLabels = {};
+    var dataLabels = {};
+
+    function resetData(boardId) {
+        var boardContainer = document.getElementById(boardId);
+        var container = document.getElementById('container');
+
+        // Check if the board container exists and is a child of the container
+        if (boardContainer && container.contains(boardContainer)) {
+            // Remove the board container from the container element
+            container.removeChild(boardContainer);
+
+            // Clear the data list
+            delete dataLists[boardId];
+            delete resultLabels[boardId];
+            delete dataLabels[boardId];
+        }
+    }
+
+    function createBoard() {
+        var boardId = 'board' + boardCount;
+        var container = document.getElementById('container');
+
+        // Create board container
+        var boardContainer = document.createElement('div');
+        boardContainer.classList.add('container');
+        boardContainer.id = boardId;
+        container.appendChild(boardContainer);
+
+        // Create board title
+        var title = document.createElement('h1');
+        title.innerText = '패턴 분석 프로그램 예측값';
+        boardContainer.appendChild(title);
+
+        // Create button group
+        var buttonGroup = document.createElement('div');
+        buttonGroup.classList.add('button-group');
+        boardContainer.appendChild(buttonGroup);
+
+        // Create buttons
+        var buttons = ['P', 'B', 'T'];
+        buttons.forEach(function (label) {
+            var button = document.createElement('button');
+            button.classList.add('pattern-button');
+            button.innerText = label;
+            button.addEventListener('click', function () {
+                buttonClicked(label, boardId);
+            });
+            buttonGroup.appendChild(button);
+        });
+
+        // Create data label
+        var dataLabel = document.createElement('div');
+        dataLabel.classList.add('data-label');
+        dataLabel.id = 'data-label-' + boardId;
+        boardContainer.appendChild(dataLabel);
+        dataLabels[boardId] = dataLabel;
+
+        // Create result label
+        var resultLabel = document.createElement('div');
+        resultLabel.classList.add('result-label');
+        resultLabel.id = 'result-label-' + boardId;
+        boardContainer.appendChild(resultLabel);
+        resultLabels[boardId] = resultLabel;
+
+        // Create reset button
+        var resetButton = document.createElement('button');
+        resetButton.classList.add('reset-button');
+        resetButton.innerText = '데이터 초기화';
+        resetButton.addEventListener('click', function () {
+            resetData(boardId);
+        });
+        boardContainer.appendChild(resetButton);
+
+        // Initialize data list
+        dataLists[boardId] = [];
+
+        boardCount++;
+    }
+
+    function analyzePattern(boardId) {
+        var data_list = dataLists[boardId].slice(-8); // Use the last 8 data entries
+        var p_indices = [];
+        var b_indices = [];
+        var t_indices = [];
+
+        // Analyze pattern based on the data list
+        for (var i = 0; i < data_list.length; i++) {
+            if (data_list[i] === 'P') {
+                p_indices.push(i);
+            } else if (data_list[i] === 'B') {
+                b_indices.push(i);
+            } else if (data_list[i] === 'T') {
+                t_indices.push(i);
+            }
+        }
+
+        var pattern = '';
+        if (p_indices.length === 3 && b_indices.length === 3 && t_indices.length === 2) {
+            pattern = 'PBT';
+        } else if (p_indices.length === 2 && b_indices.length === 4 && t_indices.length === 2) {
+            pattern = 'PBBT';
+        } else {
+            var counts = {
+                'P': p_indices.length,
+                'B': b_indices.length,
+                'T': t_indices.length
+            };
+            var predicted_value = Object.keys(counts).reduce(function (a, b) {
+                return counts[a] > counts[b] ? a : b;
+            }, '');
+            resultLabels[boardId].innerText = '예측 값: ' + predicted_value;
+            return;
+        }
+        var predicted_value = pattern[0];
+        resultLabels[boardId].innerText = '예측 값: ' + predicted_value;
+    }
+
+    function buttonClicked(label, boardId) {
+        var data_list = dataLists[boardId];
+
+        // Check if the data list already contains 8 entries
+        if (data_list.length === 8) {
+            data_list.shift(); // Remove the oldest entry
+        }
+
+        // Add the new entry to the data list
+        data_list.push(label);
+
+        // Update the data label
+        var dataLabel = dataLabels[boardId];
+        dataLabel.innerText = '데이터: ' + data_list.join(' ');
+
+        // Analyze the pattern
+        analyzePattern(boardId);
+    }
+
+    function resetData(boardId) {
+        // Clear the data list
+        dataLists[boardId] = [];
+
+        // Clear the data label
+        var dataLabel = dataLabels[boardId];
+        dataLabel.innerText = '';
+
+        // Clear the result label
+        var resultLabel = resultLabels[boardId];
+        resultLabel.innerText = '';
+    }
+
+    // Create initial board
+    createBoard();
+
+    // Create add button
+    var addButton = document.createElement('button');
+    addButton.classList.add('add-button');
+    addButton.innerText = '보드 추가';
+    addButton.addEventListener('click', function () {
+        createBoard();
+    });
+    document.body.appendChild(addButton);
+</script>
+</body>
+</html>
